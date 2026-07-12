@@ -1,0 +1,73 @@
+services:
+  backend01:
+    build: ./backend
+    environment:
+      - SERVER_ID=backend01
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health', timeout=2)"]
+      interval: 2s
+      timeout: 2s
+      retries: 5
+      start_period: 3s
+    networks: [app_net]
+
+  backend02:
+    build: ./backend
+    environment:
+      - SERVER_ID=backend02
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health', timeout=2)"]
+      interval: 2s
+      timeout: 2s
+      retries: 5
+      start_period: 3s
+    networks: [app_net]
+
+  backend03:
+    build: ./backend
+    environment:
+      - SERVER_ID=backend03
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health', timeout=2)"]
+      interval: 2s
+      timeout: 2s
+      retries: 5
+      start_period: 3s
+    networks: [app_net]
+
+  balancer:
+    container_name: nginx
+    image: nginx:1.27
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "8081:80"
+    healthcheck:
+      test: ["CMD", "wget", "-q0-", "http://localhost/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    depends_on:
+      - backend01
+      - backend02
+      - backend03
+    networks: [app_net]
+
+  k6:
+    container_name: k6-nginx
+    image: grafana/k6:latest
+    volumes:
+      - ./k6:/scripts
+      - ../results/nginx:/results
+    environment:
+      - BASE_URL=http://balancer:80
+      - SCENARIO=baseline # baseline|failure|spike
+    user: root
+    entrypoint: ["/bin/sh", "-c", "mkdir -p /results && chmod 777 /results && k6 run --out json=/results/$${SCENARIO}.json /scripts/script.js"]
+    depends_on:
+      - balancer
+    networks: [app_net]
+
+networks:
+  app_net:
+    driver: bridge
