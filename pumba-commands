@@ -1,0 +1,19 @@
+# mata o container (SIGKILL, reinicia se tiver restart policy)
+docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+  gaiaadm/pumba kill haproxy-scenario-backend01-1
+
+# pausa o processo por um tempo (simula travamento)
+docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+  gaiaadm/pumba pause --duration 10s haproxy-scenario-backend01-1
+
+# para o container
+docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+  gaiaadm/pumba stop --duration 15s haproxy-scenario-backend01-1
+
+# latência
+docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+  gaiaadm/pumba netem --duration 30s delay --time 1000 haproxy-scenario-backend01-1
+
+# perda de pacotes
+docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+  gaiaadm/pumba netem --duration 30s loss --percent 20 haproxy-scenario-backend01-1
