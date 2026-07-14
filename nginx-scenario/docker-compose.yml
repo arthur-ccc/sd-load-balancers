@@ -53,6 +53,14 @@ services:
       - backend03
     networks: [app_net]
 
+  pumba:
+    image: gaiaadm/pumba:latest
+    container_name: pumba
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks: [app_net]
+    profiles: ["chaos"]
+
   k6:
     container_name: k6-nginx
     image: grafana/k6:latest
