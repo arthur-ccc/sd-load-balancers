@@ -8,7 +8,7 @@ const SCENARIO = __ENV.SCENARIO;
 const scenarioDefs = {
   baseline: {
     executor: 'constant-arrival-rate',
-    rate: 50,
+    rate: 5,
     timeUnit: '1s',
     duration: '2m',
     preAllocatedVUs: 50,
